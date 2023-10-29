@@ -109,7 +109,6 @@ function departmentAdd() {
     ])
     .then(response => {
 
-      console.log('tuna');
       const mysqlQuery = `INSERT INTO department (name) VALUES (?)`;
       db.query(mysqlQuery, response.name, (err) => {
         if (err) {
@@ -119,6 +118,76 @@ function departmentAdd() {
         console.log(`Added ${response.name} Department Successfully!`);
         return departmentView();
       })
+    })
+}
+
+function roleAdd() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "name",
+        message: "Please Title Your Role",
+        validate: input => {
+          if (input) {
+            return true;
+          } else {
+            console.log('Please Enter A Title');
+            return false;
+          }
+        }
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: 'Please Grant This Role A Salary',
+        validate: input => {
+          if (isNaN(input)) {
+            console.log('Please Enter A Figure');
+            return false;
+          } else {
+            return true;
+          }
+        }
+      },
+      
+    ])
+    .then(response => {
+
+      const parameters = [response.name, response.salary];
+      const departmentQuery = 'SELECT * FROM department';
+      db.query(departmentQuery, (err, departments) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        const departmentList = departments.map(({name, id}) => ({name: name, value: id}));
+        console.log(departmentList);
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'department',
+              message: 'Please Assign Role To A Department',
+              choices: departmentList
+            }
+          ])
+          .then(departmentResponse => {
+            parameters.push(departmentResponse.department);
+            console.log(parameters);
+            const mysqlQuery = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
+            db.query(mysqlQuery, parameters, (err) => {
+              if (err) {
+                console.log(err);
+                return;
+              }
+              console.log(`${parameters[0]} Role Added Successfully!`);
+              return roleView();
+              
+            })
+          })
+      });
+      
     })
 }
 
