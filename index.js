@@ -9,6 +9,7 @@ const db = mysql.createConnection(
     console.log(`Connected to the employees_db database.`)
   );
 
+//establishes a constant with the main menu options loaded into it
 const mainMenuContents = [
   {
     type: 'list',
@@ -27,6 +28,7 @@ const mainMenuContents = [
   }
 ];
 
+//sets the function to view all departments
 function departmentView() {
 
   const mysqlQuery = `
