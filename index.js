@@ -33,9 +33,9 @@ const mainMenu = [
 
 function departmentsView() {
   // Query database
-db.query('SHOW TABLES;', function (err, results) {
+db.query('SELECT * FROM department', function (err, results) {
   if (results) {
-    console.log(results);
+    console.table(results);
   } else {
     console.log(err);
   };
