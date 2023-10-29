@@ -17,7 +17,7 @@ const mainMenu = [
   {
     type: 'list',
     message: 'What would you like to do?',
-    name: 'mainmenu',
+    name: 'selection',
     choices: [
     'View All Departments', 
     'View All Roles', 
@@ -25,12 +25,28 @@ const mainMenu = [
     'Add A Department', 
     'Add A Role', 
     'Add An Employee', 
-    'Update An Employee Role']
+    'Update An Employee Role',
+    'Exit'
+  ]
   }
 ];
+
+function departmentsView() {
+  // Query database
+db.query('SHOW TABLES;', function (err, results) {
+  if (results) {
+    console.log(results);
+  } else {
+    console.log(err);
+  };
+});
+}
+
 
 inquirer
     .prompt(mainMenu)
     .then((response) => {
-      console.log(response);
+      if (response.selection == 'View All Departments') {
+        departmentsView();
+      }
     })
