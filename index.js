@@ -74,11 +74,11 @@ function employeeView() {
   role.title AS Title,
   role.salary AS Salary,
   department.name AS Department,
-  CONCAT (manager.first_name, " ", manager.last_name) AS Manager
+  employee.manager_id as Manager
   FROM employee
   JOIN role ON employee.role_id = role.id
   JOIN department ON role.department_id = department.id
-  JOIN employee manager ON employee.manager_id = Manager.id
+
   `;
 
   db.query(mysqlQuery, function (err, results) {
@@ -183,11 +183,99 @@ function roleAdd() {
               }
               console.log(`${parameters[0]} Role Added Successfully!`);
               return roleView();
-              
             })
           })
-      });
-      
+      });  
+    })
+}
+
+function employeeAdd() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "firstname",
+        message: "Please Enter A First Name",
+        validate: input => {
+          if (input) {
+            return true;
+          } else {
+            console.log('Please Enter A First Name');
+            return false;
+          }
+        }
+      },
+      {
+        type: "input",
+        name: "lastname",
+        message: "Please Enter A Last Name",
+        validate: input => {
+          if (input) {
+            return true;
+          } else {
+            console.log('Please Enter A Last Name');
+            return false;
+          }
+        }
+      },
+    ])
+    .then(response => {
+
+      const parameters = [response.firstname, response.lastname];
+      const roleQuery = 'SELECT * FROM role';
+      db.query(roleQuery, (err, roles) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        const roleList = roles.map(({title, id}) => ({name: title, value: id}));
+        console.log(roleList);
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'role',
+              message: 'Please Assign Role To A Department',
+              choices: roleList
+            }
+          ])
+          .then(roleResponse => {
+            parameters.push(roleResponse.role);
+            console.log(parameters);
+            const mysqlQuery = 'SELECT * FROM employee';
+            db.query(mysqlQuery, (err, managers) => {
+              if (err) {
+                console.log(err);
+                return;
+              }
+              console.log(managers);
+              var managerList = managers.map(({first_name, last_name, id}) => ({name: `${first_name} ${last_name}`, value: id}));
+              managerList.push({name: "Unsupervised", value: null});
+              inquirer
+                .prompt([
+                  {
+                    type: 'list',
+                    name: 'manager',
+                    message: 'Select A Manager For This Employee',
+                    choices: managerList
+                  }
+                ])
+                .then(managerResponse => {
+                  parameters.push(managerResponse.manager);
+                  const mysqlQuery = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                  db.query(mysqlQuery, parameters, (err) => {
+                    if (err) {
+                      console.log(err);
+                      return;
+                    }
+                    console.log(`${parameters[0]} ${parameters[1]} Added To Employees Successfuly!`);
+                    return employeeView();
+                  })
+                })
+            })
+            
+          })
+      });  
     })
 }
 
