@@ -1,4 +1,4 @@
-//imports mysql and inquirer
+//imports mysql, inquirer, and connection parameters
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const connection = require('./connection/connection');
@@ -91,6 +91,37 @@ function employeeView() {
   });
 }
 
+function departmentAdd() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "name",
+        message: "Please Title Your Department",
+        validate: input => {
+          if (input) {
+            return true;
+          } else {
+            console.log('Please Enter A Title');
+          }
+        }
+      }
+    ])
+    .then(response => {
+
+      console.log('tuna');
+      const mysqlQuery = `INSERT INTO department (name) VALUES (?)`;
+      db.query(mysqlQuery, response.name, (err) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log(`Added ${response.name} Department Successfully!`);
+        return departmentView();
+      })
+    })
+}
+
 
 function mainMenu() {
   inquirer
@@ -108,8 +139,6 @@ function mainMenu() {
         roleAdd();
       } else if (response.selection == 'Add An Employee') {
         employeeAdd();
-      } else if (response.selection == 'Add A Department') {
-        departmentAdd();
       } else if (response.selection == 'Update An Employee Role') {
         roleUpdate();
       } else {
