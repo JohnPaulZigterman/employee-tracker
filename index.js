@@ -33,14 +33,40 @@ const mainMenuContents = [
 
 function departmentsView() {
 
-db.query('SELECT * FROM department', function (err, results) {
-  if (results) {
-    console.table(results);
-  } else {
-    console.log(err);
-  };
-  mainMenu();
-});
+  const mysqlQuery = `
+  SELECT department.id AS ID, 
+  department.name AS Name
+  FROM department`;
+
+  db.query(mysqlQuery, function (err, results) {
+    if (results) {
+      console.table(results);
+    } else {
+      console.log(err);
+    };
+    mainMenu();
+  });
+}
+
+function rolesView() {
+  
+  const mysqlQuery = `
+  SELECT role.id AS ID, 
+  role.title AS Title,
+  role.salary AS Salary,
+  department.name AS Department
+  FROM role
+  JOIN department ON role.department_id = department.id
+  `;
+
+  db.query(mysqlQuery, function (err, results) {
+    if (results) {
+      console.table(results);
+    } else {
+      console.log(err);
+    };
+    mainMenu();
+  });
 }
 
 
@@ -50,6 +76,8 @@ function mainMenu() {
     .then((response) => {
       if (response.selection == 'View All Departments') {
         departmentsView();
+      } else if (response.selection == 'View All Roles') {
+        rolesView();
       }
     })
   }
