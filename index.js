@@ -162,7 +162,6 @@ function roleAdd() {
           return;
         }
         const departmentList = departments.map(({name, id}) => ({name: name, value: id}));
-        console.log(departmentList);
         inquirer
           .prompt([
             {
@@ -174,7 +173,6 @@ function roleAdd() {
           ])
           .then(departmentResponse => {
             parameters.push(departmentResponse.department);
-            console.log(parameters);
             const mysqlQuery = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
             db.query(mysqlQuery, parameters, (err) => {
               if (err) {
@@ -229,7 +227,6 @@ function employeeAdd() {
           return;
         }
         const roleList = roles.map(({title, id}) => ({name: title, value: id}));
-        console.log(roleList);
         inquirer
           .prompt([
             {
@@ -241,14 +238,12 @@ function employeeAdd() {
           ])
           .then(roleResponse => {
             parameters.push(roleResponse.role);
-            console.log(parameters);
             const mysqlQuery = 'SELECT * FROM employee';
             db.query(mysqlQuery, (err, managers) => {
               if (err) {
                 console.log(err);
                 return;
               }
-              console.log(managers);
               var managerList = managers.map(({first_name, last_name, id}) => ({name: `${first_name} ${last_name}`, value: id}));
               managerList.push({name: "Unsupervised", value: null});
               inquirer
@@ -279,6 +274,57 @@ function employeeAdd() {
     })
 }
 
+function roleUpdate() {
+  const mysqlQuery = 'SELECT * FROM employee';
+            db.query(mysqlQuery, (err, employees) => {
+              if (err) {
+                console.log(err);
+                return;
+              }
+              var employeeList = employees.map(({first_name, last_name, id}) => ({name: `${first_name} ${last_name}`, value: id}));
+              inquirer
+                .prompt([
+                  {
+                    type: 'list',
+                    name: 'employee',
+                    message: 'Select An Employee To Change Roles',
+                    choices: employeeList
+                  }
+                ])
+                .then(employeeResponse => {
+                  const mysqlQuery = `SELECT * FROM role`;
+                  db.query(mysqlQuery, (err, roles) => {
+                    if (err) {
+                      console.log(err);
+                      return;
+                    }
+                    const roleList = roles.map(({title, id}) => ({name: title, value: id}));
+                    inquirer
+                      .prompt([
+                        {
+                          type: 'list',
+                          name: 'role',
+                          message: 'Choose A Role For This Employee',
+                          choices: roleList
+                        }
+                      ])
+                      .then(roleResponse => {
+                        const mysqlQuery = `UPDATE employee SET role_id = ${roleResponse.role} WHERE id = ${employeeResponse.employee}`;
+                        db.query(mysqlQuery, (err) => {
+                          if (err) {
+                            console.log(err);
+                            return;
+                          } else {
+                            console.log(`Role Successfully Changed!`);
+                            return employeeView();
+                          }
+
+                        })
+                      })
+                  })
+                })
+            })
+}
 
 function mainMenu() {
   inquirer
