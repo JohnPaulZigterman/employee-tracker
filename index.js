@@ -13,7 +13,7 @@ const db = mysql.createConnection(
     console.log(`Connected to the employees_db database.`)
   );
 
-const mainMenu = [
+const mainMenuContents = [
   {
     type: 'list',
     message: 'What would you like to do?',
@@ -32,21 +32,26 @@ const mainMenu = [
 ];
 
 function departmentsView() {
-  // Query database
+
 db.query('SELECT * FROM department', function (err, results) {
   if (results) {
     console.table(results);
   } else {
     console.log(err);
   };
+  mainMenu();
 });
 }
 
 
-inquirer
-    .prompt(mainMenu)
+function mainMenu() {
+  inquirer
+    .prompt(mainMenuContents)
     .then((response) => {
       if (response.selection == 'View All Departments') {
         departmentsView();
       }
     })
+  }
+
+  mainMenu();
