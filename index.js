@@ -31,7 +31,7 @@ const mainMenuContents = [
   }
 ];
 
-function departmentsView() {
+function departmentView() {
 
   const mysqlQuery = `
   SELECT department.id AS ID, 
@@ -48,7 +48,7 @@ function departmentsView() {
   });
 }
 
-function rolesView() {
+function roleView() {
   
   const mysqlQuery = `
   SELECT role.id AS ID, 
@@ -69,15 +69,55 @@ function rolesView() {
   });
 }
 
+function employeeView() {
+  
+  const mysqlQuery = `
+  SELECT employee.id AS ID, 
+  employee.first_name AS First,
+  employee.last_name AS Last,
+  role.title AS Title,
+  role.salary AS Salary,
+  department.name AS Department,
+  CONCAT (manager.first_name, " ", manager.last_name) AS Manager
+  FROM employee
+  JOIN role ON employee.role_id = role.id
+  JOIN department ON role.department_id = department.id
+  JOIN employee manager ON employee.manager_id = Manager.id
+  `;
+
+  db.query(mysqlQuery, function (err, results) {
+    if (results) {
+      console.table(results);
+    } else {
+      console.log(err);
+    };
+    mainMenu();
+  });
+}
+
 
 function mainMenu() {
   inquirer
     .prompt(mainMenuContents)
     .then((response) => {
       if (response.selection == 'View All Departments') {
-        departmentsView();
+        departmentView();
       } else if (response.selection == 'View All Roles') {
-        rolesView();
+        roleView();
+      } else if (response.selection == 'View All Employees') {
+        employeeView();
+      } else if (response.selection == 'Add A Department') {
+        departmentAdd();
+      } else if (response.selection == 'Add A Role') {
+        roleAdd();
+      } else if (response.selection == 'Add An Employee') {
+        employeeAdd();
+      } else if (response.selection == 'Add A Department') {
+        departmentAdd();
+      } else if (response.selection == 'Update An Employee Role') {
+        roleUpdate();
+      } else {
+        return;
       }
     })
   }
